@@ -262,3 +262,50 @@ Testing ping ke semua domain yang telah dibuat
 # Soal 6
 > Beberapa daerah memiliki keterbatasan yang menyebabkan hanya dapat mengakses domain secara langsung melalui alamat IP domain tersebut. Karena daerah tersebut tidak diketahui secara spesifik, pastikan semua komputer (client) dapat mengakses domain pasopati.xxxx.com melalui alamat IP Kotalingga (Notes: menggunakan pointer record).
 
+Pada DNS Master lakukan konfigurasi dengan melakukan pengubahan pada named.conf.local dan in-addr.arpa seperti pada konfigurasi berikut (membalik IP server Sriwijaya, yang awalnya `10.83.3' menjadi '3.83.10') :
+```
+#!/bin/bash
+
+# Buat reverse DNS (Record PTR)
+echo 'zone "3.83.10.in-addr.arpa" {
+    type master;
+    file "/etc/bind/jarkom/3.83.10.in-addr.arpa";
+};' >> /etc/bind/named.conf.local
+
+cp /etc/bind/db.local /etc/bind/jarkom/3.83.10.in-addr.arpa
+
+echo ';
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     pasopati.it40.com. root.pasopati.it40.com. (
+                        2024050301      ; Serial
+                         604800         ; Refresh
+   86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+3.83.10.in-addr.arpa.    IN      NS      pasopati.it40.com.
+3                       IN      PTR     pasopati.it40.com.' > /etc/bind/jarkom/3.83.10.in-addr.arpa
+
+service bind9 restart
+```
+
+Setelah itu pada masing-masing client (Samaratungga, Mulawarman, AlexanderVolta, Balaraja) lakukan setup konfigurasi 
+```
+# Set nameserver ke IP Nusantara
+echo 'nameserver 192.168.122.1' > /etc/resolv.conf
+
+# Install utils
+apt-get update
+apt-get install dnsutils -y
+
+# Kembalikan nameserver ke Sriwijaya and Majapahit
+echo '
+nameserver 10.83.3.5
+nameserver 10.83.2.2' > /etc/resolv.conf
+```
+
+Seusai semua berhasil terkonfigurasi, lakukan testing pada salah satu client 
+![WhatsApp Image 2024-10-01 at 21 00 06_0d96c5fa](https://github.com/user-attachments/assets/7efb9587-7de4-4a1c-abe7-dfa668f7e317)
