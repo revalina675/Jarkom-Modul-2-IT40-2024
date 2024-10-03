@@ -845,5 +845,72 @@ service apache2 restart
 Testing menggunakan salah satu client dengan command `lynx http://10.83.1.3/index.php`
 
 ![Video GIF No 13](./assets/1.gif)
-
 ![Video GIF No 13](./assets/2.gif)
+
+# Soal 14
+> Selama melakukan penjarahan mereka melihat bagaimana web server luar negeri, hal ini membuat mereka iri, dengki, sirik dan ingin flexing sehingga meminta agar web server dan load balancer nya diubah menjadi nginx.
+
+Ubah konfigurasi pada semua web server / worker (Kotalingga, Bedahulu, Tanjungkulai)
+```
+service apache2 stop
+
+apt install nginx php php-fpm -y
+
+service php7.0-fpm start
+
+echo 'server {
+listen 80;
+
+root /var/www/html;
+index index.php index.html index.htm index.nginx-debian.html;
+
+server_name _;
+
+location / {
+try_files $uri $uri/ /index.php?$query_string;
+}
+
+location ~ \.php$ {
+include snippets/fastcgi-php.conf;
+fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+}
+
+location ~ /\.ht {
+deny all;
+}
+}' > /etc/nginx/sites-enabled/default
+
+service php7.0-fpm restart
+
+service nginx restart
+```
+
+Lakukan juga pengubahan pada konfigurasi Load Balancer (Solok) 
+```
+service apache2 stop
+
+#Lakukan instalasi php dan nginx
+apt-get update
+apt install nginx php php-fpm -y
+apt-get install nginx -y
+
+echo "upstream backend {
+  server 10.83.3.6; # Kotalingga
+  server 10.83.2.4; # Bedahulu
+  server 10.83.2.3; # Tanjungkulai
+}
+
+server {
+  listen 80;
+
+  location / {
+    proxy_pass http://backend;
+  }
+}
+" > /etc/nginx/sites-enabled/default
+
+service nginx restart
+```
+
+Lakukan testing pada salah satu client dengan `lynx http://10.83.1.3/index.php`
+
