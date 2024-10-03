@@ -381,4 +381,413 @@ zone "rujapala.it40.com" {
 
 service bind9 restart
 ```
-Setelah itu lakukan ping testing dengan menggunakan `ping pasopati.it40.com' pada masing-masing client 7-6
+Setelah itu lakukan ping testing dengan menggunakan `ping pasopati.it40.com' pada masing-masing client
+![image](https://github.com/user-attachments/assets/ed19d3c3-8789-40e2-b23b-a2512cfdd79a)
+![image](https://github.com/user-attachments/assets/0c0dcb19-a0b7-44bc-a19d-c7b5c4598392)
+![image](https://github.com/user-attachments/assets/7ffee910-5ed4-4065-a1b2-10ea81411d0c)
+![image](https://github.com/user-attachments/assets/4d5a9303-a90f-4306-9182-14c2e94dd03c)
+
+# Soal 8
+> Kamu juga diperintahkan untuk membuat subdomain khusus melacak kekuatan tersembunyi di Ohio dengan subdomain cakra.sudarsana.xxxx.com yang mengarah ke Bedahulu.
+
+Lakukan setup konfigurasi pada Sriwijaya (DNS Master)
+```
+#!/bin/bash
+
+# Tambahkan konfigurasi untuk membuat subdomain cakra.sudarsana.it40.com
+echo '
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     sudarsana.it40.com. sudarsana.it40.com. (
+                        2024050301      ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      sudarsana.it40.com.
+@       IN      A       10.83.1.3     ; IP Solok
+www     IN      CNAME   sudarsana.it40.com.
+cakra  IN      A       10.83.2.4     ; IP Bedahulu' > /etc/bind/jarkom/sudarsana.it40.com
+
+service bind9 restart
+```
+
+Cek testing dengan mencoba menjalankan `cakra.sudarsana.it40.com` pada salah satu cliet 
+![image](https://github.com/user-attachments/assets/97ad0cd0-6ab0-451d-b69b-018c16119206)
+
+# Soal 9
+> Karena terjadi serangan DDOS oleh shikanoko nokonoko koshitantan (NUN), sehingga sistem komunikasinya terhalang. Untuk melindungi warga, kita diperlukan untuk membuat sistem peringatan dari siren man oleh Frekuensi Freak dan memasukkannya ke subdomain panah.pasopati.xxxx.com dalam folder panah dan pastikan dapat diakses secara mudah dengan menambahkan alias www.panah.pasopati.xxxx.com dan mendelegasikan subdomain tersebut ke Majapahit dengan alamat IP menuju radar di Kotalingga.
+
+Lakukan set up konfigurasi di Sriwijaya (DNS Master) 
+```
+#!/bin/bash
+
+# Tambahkan konfigurasi untuk delegasi panah.pasopati.it40.com ke Majapahit
+echo '
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     pasopati.it40.com. pasopati.it40.com. (
+                        2024050301      ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      pasopati.it40.com.
+@       IN      A       10.83.3.6     ; IP Kotalingga
+www     IN      CNAME   pasopati.it40.com.
+ns1     IN      A       10.83.2.2     ; Terusin ke Majapahit
+panah   IN      NS      ns1' > /etc/bind/jarkom/pasopati.it40.com
+
+echo '
+options {
+        directory "/var/cache/bind";
+
+        //dnssec-validation auto;
+        allow-query{any;};
+
+        auth-nxdomain no;    # confirm to RFC1035
+        listen-on-v6 { any; };
+};' > /etc/bind/named.conf.options
+
+service bind9 restart
+```
+
+Lakukan setup konfigurasi juga di Majapahit (DNS Slave)
+```
+#!/bin/bash
+
+# Setup
+echo '
+options {
+        directory "/var/cache/bind";
+
+        //dnssec-validation auto;
+        allow-query{any;};
+
+        auth-nxdomain no;    
+        listen-on-v6 { any; };
+};' > /etc/bind/named.conf.options
+
+echo 'zone "panah.pasopati.it40.com" {
+	type master;
+	file "/etc/bind/panah/panah.pasopati.it40.com";
+};' >> /etc/bind/named.conf.local
+
+mkdir /etc/bind/panah
+
+cp /etc/bind/db.local /etc/bind/panah/panah.pasopati.it40.com
+
+echo '
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     panah.pasopati.it40.com. root.panah.pasopati.it40.com. (
+                        2024050301      ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      panah.pasopati.it40.com.
+@       IN      A       10.83.3.6     ; IP Kotalingga
+www     IN      CNAME   panah.pasopati.it40.com.' > /etc/bind/panah/panah.pasopati.it40.com
+
+service bind9 restart
+```
+
+Lakukan testing dengan melakukan 'ping panah.pasopati.it40.com' pada salah satu client 
+![image](https://github.com/user-attachments/assets/a4bcd42a-232f-4727-9830-bf7c08d54db0)
+
+# Soal 10
+> Markas juga meminta catatan kapan saja meme brain rot akan dijatuhkan, maka buatlah subdomain baru di subdomain panah yaitu log.panah.pasopati.xxxx.com serta aliasnya www.log.panah.pasopati.xxxx.com yang juga mengarah ke Kotalingga.
+
+Buat konfigurasi script pada Majapahit (DNS Slave)
+```
+#!/bin/bash
+
+# Tambahkan konfigurasi untuk membuat subdomain log.panah.pasopati.it40.com
+echo '
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     panah.pasopati.it40.com. panah.pasopati.it40.com. (
+                        2024050301      ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      panah.pasopati.it40.com.
+@       IN      A       10.83.3.6     ; IP Kotalingga
+www     IN      CNAME   panah.pasopati.it40.com.
+log     IN      A       10.83.3.6     ; IP Kotalingga
+www.log IN      CNAME   panah.pasopati.it40.com.' > /etc/bind/panah/panah.pasopati.it40.com
+
+service bind9 restart
+```
+
+Lakukan testing pada salah satu client dengan command `ping log.panah.pasopati.it40.com`
+
+![image](https://github.com/user-attachments/assets/8a7958df-9c9c-42cb-bfaf-26de700bc594)
+
+# Soal 11
+> Setelah pertempuran mereda, warga IT dapat kembali mengakses jaringan luar dan menikmati meme brainrot terbaru, tetapi hanya warga Majapahit saja yang dapat mengakses jaringan luar secara langsung. Buatlah konfigurasi agar warga IT yang berada diluar Majapahit dapat mengakses jaringan luar melalui DNS Server Majapahit.
+
+Lakukan setup konfigurasi pada Sriwijaya (DNS Master)
+```
+#!/bin/bash
+
+# Tambahkan konfigurasi untuk DNS forwarder
+echo '
+options {
+        directory "/var/cache/bind";
+
+        forwarders {
+                192.168.122.1; //IP Nusantara
+        };
+        //dnssec-validation auto;
+        allow-query{any;};
+
+        auth-nxdomain no;   
+        listen-on-v6 { any; };
+};' > /etc/bind/named.conf.options
+
+service bind9 restart
+```
+
+Lakukan setup konfigurasi Majapahit (DNS Slave)
+```
+#!/bin/bash
+
+# Tambahkan konfigurasi untuk DNS forwarder
+echo '
+options {
+        directory "/var/cache/bind";
+
+        forwarders {
+                192.168.122.1; //IP Nusantara
+        };
+        //dnssec-validation auto;
+        allow-query{any;};
+
+        auth-nxdomain no;   
+        listen-on-v6 { any; };
+};' > /etc/bind/named.conf.options
+
+service bind9 restart
+```
+
+Lakukan testing dengan `ping www.google.com` pada salah satu client
+![image](https://github.com/user-attachments/assets/3fe7fc4d-a67b-47f1-9bd1-3092e570588a)
+
+# Soal 12
+> Karena pusat ingin sebuah laman web yang ingin digunakan untuk memantau kondisi kota lainnya maka deploy laman web ini (cek resource yg lb) pada Kotalingga menggunakan apache.
+
+Lakukan config network dengan menambahkan ip Kotalingga pada Sriwijaya (DNS Master)
+```
+#!/bin/bash
+
+# Tambahkan nameserver Ip Kotalingga
+echo '
+nameserver 10.75.2.3' > /etc/resolv.conf
+```
+Setelah itu lakukan instalasi browser lynx pada setiap client 
+```
+#!/bin/bash
+
+# Lakukan instalasi browser Lynx
+if ! command -v named &> /dev/null
+then
+    echo "Lynx belum ada, melakukan penginstalan..."
+    
+    # Melakukan instalasi lynx
+    apt-get update
+    apt-get install lynx -y
+else
+    echo "lynx sudah ada dan siap digunakan."
+fi
+```
+
+Lakukan setup konfigurasi pada Kotalingga (Web Server) 
+```
+#!/bin/bash
+
+# Tambahkan konfigurasi agar bisa deploy
+
+# Cek apakah apache2 sudah terinstal
+if ! command -v named &> /dev/null
+then
+    echo "Apache2 belum ada, melakukan penginstalan..."
+    # Melakukan instalasi apache2
+    apt-get update
+    apt-get install apache2 -y
+    apt-get install libapache2-mod-php7.0 -y
+else
+    echo "apache2 sudah terinstal."
+fi
+
+# Cek apakah unzip sudah terinstal
+if ! command -v named &> /dev/null
+then
+    echo "Unzip belum ada, melakukan penginstalan..."
+    # Melakukan instalasi unzip
+    apt-get update
+    apt-get install unzip -y
+else
+    echo "unzip sudah terinstal."
+fi
+
+# Cek apakah php sudah terinstal
+if ! command -v named &> /dev/null
+then
+    echo "PHP belum ada, melakukan penginstalan..."
+    # Melakukan instalasi php
+    apt-get update
+    apt-get install php -y
+else
+    echo "php sudah terinstal."
+fi
+
+# Download file lb.zip
+curl -k "https://drive.usercontent.google.com/download?id={1Sqf0TIiybYyUp5nyab4twy9svkgq8bi7}&confirm=xxx" -o lb.zip
+
+# Unzip file lb.zip
+unzip lb.zip
+
+# Hapus file template
+rm -rf /var/www/html/index.php
+
+# Copy file index.php
+cp worker/index.php /var/www/html/index.php
+
+service apache2 restart
+```
+
+Lakukan testing pada masing-masing client dengan command `lynx http://10.83.3.6/index.php`
+![image](https://github.com/user-attachments/assets/5b4fda40-5ee7-420a-b79d-b050768bd193)
+
+# Soal 13
+> Karena Sriwijaya dan Majapahit memenangkan pertempuran ini dan memiliki banyak uang dari hasil penjarahan (sebanyak 35 juta, belum dipotong pajak) maka pusat meminta kita memasang load balancer untuk membagikan uangnya pada web nya, dengan Kotalingga, Bedahulu, Tanjungkulai sebagai worker dan Solok sebagai Load Balancer menggunakan apache sebagai web server nya dan load balancer nya.
+
+Lakukan setup konfigurasi pada Sriwijaya (DNS Master) dan Majapahit (DNS Slave) 
+```
+#!/bin/bash
+
+# Tambahkan nameserver Ip Mylta
+echo '
+nameserver 192.168.122.1
+nameserver 10.83.1.3' > /etc/resolv.conf
+```
+
+Lakukan setup konfigurasi pada Load Balancer (Solok) 
+```
+#!/bin/bash
+
+# Tambahkan keperluan untuk setting load balancer pada Solok
+
+# Cek apakah apache2 wes onok bolo.
+if ! command -v named &> /dev/null
+then
+    echo "Apache2 durung keinstall, utiwi get..."
+    # Melakukan instalasi apache2
+    apt-get update
+    apt-get install apache2 -y
+    apt-get install libapache2-mod-php7.0 -y
+else
+    echo "apache2 wes onok bolo.."
+fi
+
+# Cek apakah php wes onok bolo.
+if ! command -v named &> /dev/null
+then
+    echo "PHP durung keinstall, utiwi get..."
+    # Melakukan instalasi php
+    apt-get update
+    apt-get install php -y
+else
+    echo "php wes onok bolo.."
+fi
+
+# Enable apache2 module
+a2enmod proxy_balancer
+a2enmod proxy_http
+a2enmod lbmethod_byrequests
+echo '
+<VirtualHost *:80>
+    <Proxy balancer://serverpool>
+        BalancerMember http://10.83.3.6/ #Kotalingga
+        BalancerMember http://10.83.2.4/ #Bedahulu
+        BalancerMember http://10.83.2.3/ #Tanjungkulai
+        Proxyset lbmethod=byrequests
+    </Proxy>
+    ProxyPass / balancer://serverpool/
+    ProxyPassReverse / balancer://serverpool/
+</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+
+service apache2 restart
+```
+
+Lakukan setup konfigurasi pada masing-masing Web Server / Worker yang ada (Kotalingga, Bedahulu, Tanjungkulai)
+```
+#!/bin/bash
+
+# Tambahkan untuk keperluan load balancer
+# Cek apakah apache2 sudah terinstal
+if ! command -v named &> /dev/null
+then
+    echo "Apache2 belum terinstal, melakukan instalasi..."
+    # Melakukan instalasi apache2
+    apt-get update
+    apt-get install apache2 -y
+    apt-get install libapache2-mod-php7.0 -y
+else
+    echo "apache2 sudah terinstal."
+fi
+
+# Cek apakah unzip sudah terinstal
+if ! command -v named &> /dev/null
+then
+    echo "Unzip belum terinstal, melakukan instalasi..."
+    # Melakukan instalasi unzip
+    apt-get update
+    apt-get install unzip -y
+else
+    echo "unzip sudah terinstal."
+fi
+
+# Cek apakah php sudah terinstal
+if ! command -v named &> /dev/null
+then
+    echo "PHP belum terinstal, melakukan instalasi..."
+    # Melakukan instalasi php
+    apt-get update
+    apt-get install php -y
+else
+    echo "php sudah terinstal."
+fi
+
+# Download file lb.zip
+curl -k "https://drive.usercontent.google.com/download?id={1Sqf0TIiybYyUp5nyab4twy9svkgq8bi7}&confirm=xxx" -o lb.zip
+
+# Unzip file lb.zip
+unzip lb.zip
+
+# Hapus file template
+rm -rf /var/www/html/index.php
+
+# Copy file index.php
+cp worker/index.php /var/www/html/index.php
+
+service apache2 restart
+```
+
+Testing menggunakan salah satu client dengan command `lynx http://10.83.1.3/index.php` 
+
