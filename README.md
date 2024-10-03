@@ -308,4 +308,77 @@ nameserver 10.83.2.2' > /etc/resolv.conf
 ```
 
 Seusai semua berhasil terkonfigurasi, lakukan testing pada salah satu client 
-![WhatsApp Image 2024-10-01 at 21 00 06_0d96c5fa](https://github.com/user-attachments/assets/7efb9587-7de4-4a1c-abe7-dfa668f7e317)
+![image](https://github.com/user-attachments/assets/ab53550e-2e66-4479-bb76-58c53bcd027f)
+
+# Soal 7
+> Akhir-akhir ini seringkali terjadi serangan brainrot ke DNS Server Utama, sebagai tindakan antisipasi kamu diperintahkan untuk membuat DNS Slave di Majapahit untuk semua domain yang sudah dibuat sebelumnya yang mengarah ke Sriwijaya.
+
+Pada DNS Server (Sriwijaya) lakukan setup konfigurasi 
+```
+#!/bin/bash
+
+# Tambahkan kebutuhan untuk menjadi master pochinki
+echo '
+zone "sudarsana.it40.com" {
+        type master;
+        notify yes;
+        also-notify { 10.83.2.2; }; //IP Majapahit
+        allow-transfer { 10.83.2.2; }; //IP Majapahit
+        file "/etc/bind/jarkom/sudarsana.it40.com";
+};
+
+zone "pasopati.it40.com" {
+        type master;
+        notify yes;
+        also-notify { 10.83.2.2; }; //IP Majapahit
+        allow-transfer { 10.83.2.2; }; //IP Majapahit
+        file "/etc/bind/jarkom/pasopati.it40.com";
+};
+
+zone "rujapala.it40.com" {
+        type master;
+        notify yes;
+        also-notify { 10.83.2.2; }; //IP Majapahit
+        allow-transfer { 10.83.2.2; }; //IP Majapahit
+        file "/etc/bind/jarkom/rujapala.it40.com";
+};' > /etc/bind/named.conf.local
+
+service bind9 restart
+```
+
+Lalu lakukan setup konfigurasi juga pada DNS Slave (Majapahit) 
+```
+#!/bin/bash
+# Cek apakah bind9 sudah terinstal
+if ! command -v named &> /dev/null
+then
+    echo "Bind9 belum terinstal, melakukan instalasi..."
+    # Melakukan instalasi bind9
+    apt-get update
+    apt-get install bind9 -y
+else
+    echo "Bind9 sudah terinstal."
+fi
+
+echo '
+zone "sudarsana.it40.com" {
+    type slave;
+    masters { 10.83.3.5; }; // IP Sriwijaya
+    file "/var/lib/bind/sudarsana.it40.com";
+};
+
+zone "pasopati.it40.com" {
+    type slave;
+    masters { 10.83.3.5; }; // IP Sriwijaya
+    file "/var/lib/bind/pasopati.it40.com";
+};
+
+zone "rujapala.it40.com" {
+ type slave;
+    masters { 10.83.3.5; }; // IP Sriwijaya
+    file "/var/lib/bind/rujapala.it40.com";
+};' > /etc/bind/named.conf.local
+
+service bind9 restart
+```
+Setelah itu lakukan ping testing dengan menggunakan `ping pasopati.it40.com' pada masing-masing client 7-6
