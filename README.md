@@ -913,4 +913,167 @@ service nginx restart
 ```
 
 Lakukan testing pada salah satu client dengan `lynx http://10.83.1.3/index.php`
+((GAMBAR))
 
+# Soal 15
+> Markas pusat meminta laporan hasil benchmark dengan menggunakan apache benchmark dari load balancer dengan 2 web server yang berbeda tersebut dan meminta secara detail dengan ketentuan:
+> * Nama Algoritma Load Balancer
+> * Report hasil testing apache benchmark 
+> * Grafik request per second untuk masing masing algoritma. 
+> * Analisis
+> * Meme terbaik kalian (terserah ( ͡° ͜ʖ ͡°)) 🤓
+
+Lakukan instalasi apache2-utils untuk melakukan instalasi pada tools yang diperlukan
+```
+apt-get install apache2-utils -y
+```
+
+Jalankan command `ab -n 1000 -c 100 http://(ip load balancer)` disini kami memakai `ab -n 1000 -c 100 http://10.83.1.3`
+![image](https://github.com/user-attachments/assets/4e091bb3-749e-4493-8b82-351893b3c934)
+![image](https://github.com/user-attachments/assets/dc3d81f7-9acc-4199-a9b6-61d0316424ea)
+![image](https://github.com/user-attachments/assets/524b5092-d9b1-4469-8e40-a97c3176218b)
+
+# Soal 16
+> Karena dirasa kurang aman dari brainrot karena masih memakai IP, markas ingin akses ke Solok memakai solok.xxxx.com dengan alias www.solok.xxxx.com (sesuai web server terbaik hasil analisis kalian).
+
+Lakukan reconfig pada DNS Master (Sriwijaya)
+```
+echo 'zone "solok.it40.com" {
+        type master;
+        file "/etc/bind/jarkom/solok.it40.com";
+};' > /etc/bind/named.conf.local
+
+mkdir /etc/bind/jarkom
+
+cp /etc/bind/db.local /etc/bind/jarkom/solok.it40.com
+
+echo '
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     solok.it40.com. root.solok.it40.com. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      solok.it40.com.
+@       IN      A       10.83.3.6     ; IP Kotalingga
+www             IN      CNAME   solok.it40.com.
+' > /etc/bind/jarkom/solok.it40.com
+
+service bind9 restart
+```
+Lakukan reconfig pada Load Balancer (Solok)
+```
+service nginx stop
+
+echo 'upstream backend {
+server 10.83.3.6; # IP Kotalingga
+server 10.83.2.4; # IP Bedahulu
+server 10.83.2.3; # IP Lipovka
+}
+
+server {
+listen 80;
+server_name solok.it40.com www.solok.it40.com; 
+
+location / {
+proxy_pass http://backend;
+}
+}
+' > /etc/nginx/sites-enabled/default
+
+service nginx restart
+```
+
+![image](https://github.com/user-attachments/assets/dd26d3cd-1112-4a5a-892d-3d415109872d)
+
+# Soal 17
+> Agar aman, buatlah konfigurasi agar solok.xxx.com hanya dapat diakses melalui port sebesar π x 10^4 = (phi nya desimal) dan 2000 + 2000 log 10 (10) +700 - π = ?.
+
+Lakukan reconfig pada Load Balancer (Solok)
+```
+echo 'upstream backend {
+server 10.83.3.6; # IP Kotalingga
+server 10.83.2.4; # IP Bedahulu
+server 10.83.2.3; # IP Lipovka
+}
+
+server {
+listen 31400;
+listen 4696;
+server_name solok.it40.com www.solok.it40.com; 
+
+location / {
+proxy_pass http://backend;
+}
+}
+' > /etc/nginx/sites-enabled/default
+
+service nginx restart
+```
+
+Testing melalui client lain dengan command `lynx http://solok.it40.com:(31400/4696)`
+
+# Soal 18
+> Apa bila ada yang mencoba mengakses IP solok akan secara otomatis dialihkan ke www.solok.xxxx.com.
+
+Lakukan reconfig solok dengan script berikut
+```
+echo 'upstream backend {
+server 10.83.3.6; # IP Kotalingga
+server 10.83.2.4; # IP Bedahulu
+server 10.83.2.3; # IP Lipovka
+}
+
+server {
+listen 80;
+listen 31400;
+listen 4696;
+server_name solok.it40.com www.solok.it40.com; 
+
+location / {
+proxy_pass http://backend;
+if ($host = 10.83.1.3) {
+return 301 http://www.solok.it40.com:31400$request_uri;
+}
+}
+}
+' > /etc/nginx/sites-enabled/default
+
+service nginx restart
+```
+
+Testing di client dengan `http://10.83.1.3/`
+
+# Soal 19
+> Karena probset sudah kehabisan ide masuk ke salah satu worker buatkan akses direktori listing yang mengarah ke resource worker2.
+
+* Pertama, ketikkan `mkdir -p /var/www/sekianterimakasih.it40.com`
+  
+* Lakukan `cd /var/www/sekianterimakasih.it40.com`
+  
+* Ketikkan `curl -k "https://drive.usercontent.google.com/download?id={1JGk8b-tZgzAOnDqTx5B3F9qN6AyNs7Zy}&confirm=xxx" -o worker2.zip
+unzip worker2.zip`
+
+* Setelah itu ketikkan `mv /var/www/dir-listing/worker2 /var/www/sekianterimakasih.it40.com`
+
+* Lakukan `nano /etc/apache2/sites-available/sekianterimakasih.it40.com` dan tambahkan
+```
+ServerAdmin webmaster@localhost
+DocumentRoot /var/www/sekianterimakasih.it40.com`
+ServerName sekianterimakasih.it40.com`
+
+<Directory /var/www/sekianterimakasih.it40.com/worker2>
+  Options +Indexes
+</Directory>
+a2ensite sekianterimakasih.it40.com
+testing di client dengan lynx 10.83.3.6/worker2
+```
+
+* Setelah itu ketikkan `a2ensite sekianterimakasih.it40.com`
+
+* Dan terakhir, testing di client dengan `lynx 10.83.3.6/worker2`
