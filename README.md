@@ -1,15 +1,18 @@
 # LAPORAN RESMI MODUL 02 KOMUNIKASI DATA DAN JARINGAN KOMPUTER
+
 ## Kelompok IT40
+
 ### Anggota Kelompok :
-|             Nama              |     NRP    |
-|-------------------------------|------------|
+
+| Nama                          | NRP        |
+| ----------------------------- | ---------- |
 | Revalina Fairuzy Azhari Putri | 5027231001 |
 | Kevin Anugerah Faza           | 5027231027 |
 
-
-*Sebuah kerajaan besar di Indonesia sedang mengalami pertempuran dengan penjajah. Kerajaan tersebut adalah Sriwijaya. Karena merasa terdesak Sriwijaya meminta bantuan pada Majapahit untuk mempertahankan wilayahnya. Pertempuran besar tersebut berada di Nusantara. Untuk topologi lihat pada link ini*
+_Sebuah kerajaan besar di Indonesia sedang mengalami pertempuran dengan penjajah. Kerajaan tersebut adalah Sriwijaya. Karena merasa terdesak Sriwijaya meminta bantuan pada Majapahit untuk mempertahankan wilayahnya. Pertempuran besar tersebut berada di Nusantara. Untuk topologi lihat pada link ini_
 
 # Soal 1
+
 > Untuk mempersiapkan peperangan World War MMXXIV (Iya sebanyak itu), Sriwijaya membuat dua kotanya menjadi web server yaitu Tanjungkulai, dan Bedahulu, serta Sriwijaya sendiri akan menjadi DNS Master. Kemudian karena merasa terdesak, Majapahit memberikan bantuan dan menjadikan kerajaannya (Majapahit) menjadi DNS Slave.
 
 Topologi Jaringan
@@ -19,6 +22,7 @@ Topologi Jaringan
 **Network Config.**
 
 **Nusantara (Router)**
+
 ```
 auto eth0
 iface eth0 inet dhcp
@@ -39,8 +43,11 @@ iface eth3 inet static
 	address 10.83.3.1
 	netmask 255.255.255.0
 ```
+
 **Client**
-* Samaratungga
+
+- Samaratungga
+
 ```
 auto eth0
 iface eth0 inet static
@@ -49,7 +56,8 @@ iface eth0 inet static
 	gateway 10.83.1.1
 ```
 
-* Mulawarman
+- Mulawarman
+
 ```
 auto eth0
 iface eth0 inet static
@@ -58,7 +66,8 @@ iface eth0 inet static
 	gateway 10.83.3.1
 ```
 
-* AlexanderVolta
+- AlexanderVolta
+
 ```
 auto eth0
 iface eth0 inet static
@@ -70,7 +79,8 @@ iface eth0 inet static
 	up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
-* Balaraja
+- Balaraja
+
 ```
 auto eth0
 iface eth0 inet static
@@ -78,7 +88,9 @@ iface eth0 inet static
 	netmask 255.255.255.0
 	gateway 10.83.3.1
 ```
+
 **Solok (Load Balancer)**
+
 ```
 auto eth0
 iface eth0 inet static
@@ -87,9 +99,11 @@ iface eth0 inet static
 	gateway 10.83.1.1
 	up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
+
 **Server**
 
-* Sriwijaya
+- Sriwijaya
+
 ```
 auto eth0
 iface eth0 inet static
@@ -99,7 +113,8 @@ iface eth0 inet static
 	up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
-* Majapahit
+- Majapahit
+
 ```
 auto eth0
 iface eth0 inet static
@@ -110,7 +125,9 @@ iface eth0 inet static
 ```
 
 **Web Server**
-* Kotalingga
+
+- Kotalingga
+
 ```
 auto eth0
 iface eth0 inet static
@@ -120,7 +137,8 @@ iface eth0 inet static
 	up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
-* Bedahulu
+- Bedahulu
+
 ```
 auto eth0
 iface eth0 inet static
@@ -130,7 +148,8 @@ iface eth0 inet static
 	up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
-* Tanjungkulai
+- Tanjungkulai
+
 ```
 auto eth0
 iface eth0 inet static
@@ -140,16 +159,18 @@ iface eth0 inet static
 	up echo nameserver 192.168.122.1 > /etc/resolv.conf
 ```
 
-Setelah membuat semua konfigurasi untuk network yang ada, sambungkan local network dengan Nusantara menggunakan command : 
+Setelah membuat semua konfigurasi untuk network yang ada, sambungkan local network dengan Nusantara menggunakan command :
 `iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE -s 192.168.0.0/16`
 
 Lakukan ping apakah clients telah terintegrasi dengan NAT dan Local Network
 ![image](https://github.com/user-attachments/assets/3723c787-ced7-4085-b2bb-96ced85eb595)
 
 # Soal 2
+
 > Karena para pasukan membutuhkan koordinasi untuk melancarkan serangannya, maka buatlah sebuah domain yang mengarah ke Solok dengan alamat sudarsana.xxxx.com dengan alias www.sudarsana.xxxx.com, dimana xxxx merupakan kode kelompok. Contoh: sudarsana.it01.com.
 
 Buat sebuah script pada DNS Master untuk menyimpan konfigurasi sudarsana.xxxx.com yang diminta, yaitu :
+
 ```
 #!/bin/bash
 
@@ -183,9 +204,11 @@ service bind9 restart
 ```
 
 # Soal 3
+
 > Para pasukan juga perlu mengetahui mana titik yang akan diserang, sehingga dibutuhkan domain lain yaitu pasopati.xxxx.com dengan alias www.pasopati.xxxx.com yang mengarah ke Kotalingga.
 
 Buat lagi sebuah script pada DNS Master untuk menyimpan konfigurasi pasopati yang diminta, yaitu :
+
 ```
 #!/bin/bash
 
@@ -219,9 +242,11 @@ service bind9 restart
 ```
 
 # Soal 4
+
 > Markas pusat meminta dibuatnya domain khusus untuk menaruh informasi persenjataan dan suplai yang tersebar. Informasi dan suplai meme terbaru tersebut mengarah ke Tanjungkulai dan domain yang ingin digunakan adalah rujapala.xxxx.com dengan alias www.rujapala.xxxx.com.
 
 Buat lagi sebuah script untuk menyimpan konfigurasi rujapala yang diminta, yaitu :
+
 ```
 #!/bin/bash
 
@@ -253,16 +278,20 @@ www     IN      CNAME   rujapala.it40.com.' > /etc/bind/jarkom/rujapala.it40.com
 
 service bind9 restart
 ```
+
 # Soal 5
+
 > Pastikan domain-domain tersebut dapat diakses oleh seluruh komputer (client) yang berada di Nusantara.
 
-Testing ping ke semua domain yang telah dibuat 
+Testing ping ke semua domain yang telah dibuat
 ![image](https://github.com/user-attachments/assets/adcec7ff-97c3-404f-9ec7-2d73e77faeb5)
 
 # Soal 6
+
 > Beberapa daerah memiliki keterbatasan yang menyebabkan hanya dapat mengakses domain secara langsung melalui alamat IP domain tersebut. Karena daerah tersebut tidak diketahui secara spesifik, pastikan semua komputer (client) dapat mengakses domain pasopati.xxxx.com melalui alamat IP Kotalingga (Notes: menggunakan pointer record).
 
 Pada DNS Master lakukan konfigurasi dengan melakukan pengubahan pada named.conf.local dan in-addr.arpa seperti pada konfigurasi berikut (membalik IP server Sriwijaya, yang awalnya `10.83.3' menjadi '3.83.10') :
+
 ```
 #!/bin/bash
 
@@ -292,7 +321,8 @@ $TTL    604800
 service bind9 restart
 ```
 
-Setelah itu pada masing-masing client (Samaratungga, Mulawarman, AlexanderVolta, Balaraja) lakukan setup konfigurasi 
+Setelah itu pada masing-masing client (Samaratungga, Mulawarman, AlexanderVolta, Balaraja) lakukan setup konfigurasi
+
 ```
 # Set nameserver ke IP Nusantara
 echo 'nameserver 192.168.122.1' > /etc/resolv.conf
@@ -307,13 +337,15 @@ nameserver 10.83.3.5
 nameserver 10.83.2.2' > /etc/resolv.conf
 ```
 
-Seusai semua berhasil terkonfigurasi, lakukan testing pada salah satu client 
+Seusai semua berhasil terkonfigurasi, lakukan testing pada salah satu client
 ![image](https://github.com/user-attachments/assets/ab53550e-2e66-4479-bb76-58c53bcd027f)
 
 # Soal 7
+
 > Akhir-akhir ini seringkali terjadi serangan brainrot ke DNS Server Utama, sebagai tindakan antisipasi kamu diperintahkan untuk membuat DNS Slave di Majapahit untuk semua domain yang sudah dibuat sebelumnya yang mengarah ke Sriwijaya.
 
-Pada DNS Server (Sriwijaya) lakukan setup konfigurasi 
+Pada DNS Server (Sriwijaya) lakukan setup konfigurasi
+
 ```
 #!/bin/bash
 
@@ -346,7 +378,8 @@ zone "rujapala.it40.com" {
 service bind9 restart
 ```
 
-Lalu lakukan setup konfigurasi juga pada DNS Slave (Majapahit) 
+Lalu lakukan setup konfigurasi juga pada DNS Slave (Majapahit)
+
 ```
 #!/bin/bash
 # Cek apakah bind9 sudah terinstal
@@ -381,6 +414,7 @@ zone "rujapala.it40.com" {
 
 service bind9 restart
 ```
+
 Setelah itu lakukan ping testing dengan menggunakan `ping pasopati.it40.com' pada masing-masing client
 ![image](https://github.com/user-attachments/assets/ed19d3c3-8789-40e2-b23b-a2512cfdd79a)
 ![image](https://github.com/user-attachments/assets/0c0dcb19-a0b7-44bc-a19d-c7b5c4598392)
@@ -388,9 +422,11 @@ Setelah itu lakukan ping testing dengan menggunakan `ping pasopati.it40.com' pad
 ![image](https://github.com/user-attachments/assets/4d5a9303-a90f-4306-9182-14c2e94dd03c)
 
 # Soal 8
+
 > Kamu juga diperintahkan untuk membuat subdomain khusus melacak kekuatan tersembunyi di Ohio dengan subdomain cakra.sudarsana.xxxx.com yang mengarah ke Bedahulu.
 
 Lakukan setup konfigurasi pada Sriwijaya (DNS Master)
+
 ```
 #!/bin/bash
 
@@ -415,13 +451,15 @@ cakra  IN      A       10.83.2.4     ; IP Bedahulu' > /etc/bind/jarkom/sudarsana
 service bind9 restart
 ```
 
-Cek testing dengan mencoba menjalankan `cakra.sudarsana.it40.com` pada salah satu cliet 
+Cek testing dengan mencoba menjalankan `cakra.sudarsana.it40.com` pada salah satu cliet
 ![image](https://github.com/user-attachments/assets/97ad0cd0-6ab0-451d-b69b-018c16119206)
 
 # Soal 9
+
 > Karena terjadi serangan DDOS oleh shikanoko nokonoko koshitantan (NUN), sehingga sistem komunikasinya terhalang. Untuk melindungi warga, kita diperlukan untuk membuat sistem peringatan dari siren man oleh Frekuensi Freak dan memasukkannya ke subdomain panah.pasopati.xxxx.com dalam folder panah dan pastikan dapat diakses secara mudah dengan menambahkan alias www.panah.pasopati.xxxx.com dan mendelegasikan subdomain tersebut ke Majapahit dengan alamat IP menuju radar di Kotalingga.
 
-Lakukan set up konfigurasi di Sriwijaya (DNS Master) 
+Lakukan set up konfigurasi di Sriwijaya (DNS Master)
+
 ```
 #!/bin/bash
 
@@ -459,6 +497,7 @@ service bind9 restart
 ```
 
 Lakukan setup konfigurasi juga di Majapahit (DNS Slave)
+
 ```
 #!/bin/bash
 
@@ -470,7 +509,7 @@ options {
         //dnssec-validation auto;
         allow-query{any;};
 
-        auth-nxdomain no;    
+        auth-nxdomain no;
         listen-on-v6 { any; };
 };' > /etc/bind/named.conf.options
 
@@ -502,13 +541,15 @@ www     IN      CNAME   panah.pasopati.it40.com.' > /etc/bind/panah/panah.pasopa
 service bind9 restart
 ```
 
-Lakukan testing dengan melakukan 'ping panah.pasopati.it40.com' pada salah satu client 
+Lakukan testing dengan melakukan 'ping panah.pasopati.it40.com' pada salah satu client
 ![image](https://github.com/user-attachments/assets/a4bcd42a-232f-4727-9830-bf7c08d54db0)
 
 # Soal 10
+
 > Markas juga meminta catatan kapan saja meme brain rot akan dijatuhkan, maka buatlah subdomain baru di subdomain panah yaitu log.panah.pasopati.xxxx.com serta aliasnya www.log.panah.pasopati.xxxx.com yang juga mengarah ke Kotalingga.
 
 Buat konfigurasi script pada Majapahit (DNS Slave)
+
 ```
 #!/bin/bash
 
@@ -539,9 +580,11 @@ Lakukan testing pada salah satu client dengan command `ping log.panah.pasopati.i
 ![image](https://github.com/user-attachments/assets/8a7958df-9c9c-42cb-bfaf-26de700bc594)
 
 # Soal 11
+
 > Setelah pertempuran mereda, warga IT dapat kembali mengakses jaringan luar dan menikmati meme brainrot terbaru, tetapi hanya warga Majapahit saja yang dapat mengakses jaringan luar secara langsung. Buatlah konfigurasi agar warga IT yang berada diluar Majapahit dapat mengakses jaringan luar melalui DNS Server Majapahit.
 
 Lakukan setup konfigurasi pada Sriwijaya (DNS Master)
+
 ```
 #!/bin/bash
 
@@ -556,7 +599,7 @@ options {
         //dnssec-validation auto;
         allow-query{any;};
 
-        auth-nxdomain no;   
+        auth-nxdomain no;
         listen-on-v6 { any; };
 };' > /etc/bind/named.conf.options
 
@@ -564,6 +607,7 @@ service bind9 restart
 ```
 
 Lakukan setup konfigurasi Majapahit (DNS Slave)
+
 ```
 #!/bin/bash
 
@@ -578,7 +622,7 @@ options {
         //dnssec-validation auto;
         allow-query{any;};
 
-        auth-nxdomain no;   
+        auth-nxdomain no;
         listen-on-v6 { any; };
 };' > /etc/bind/named.conf.options
 
@@ -589,9 +633,11 @@ Lakukan testing dengan `ping www.google.com` pada salah satu client
 ![image](https://github.com/user-attachments/assets/3fe7fc4d-a67b-47f1-9bd1-3092e570588a)
 
 # Soal 12
+
 > Karena pusat ingin sebuah laman web yang ingin digunakan untuk memantau kondisi kota lainnya maka deploy laman web ini (cek resource yg lb) pada Kotalingga menggunakan apache.
 
 Lakukan config network dengan menambahkan ip Kotalingga pada Sriwijaya (DNS Master)
+
 ```
 #!/bin/bash
 
@@ -599,7 +645,9 @@ Lakukan config network dengan menambahkan ip Kotalingga pada Sriwijaya (DNS Mast
 echo '
 nameserver 10.75.2.3' > /etc/resolv.conf
 ```
-Setelah itu lakukan instalasi browser lynx pada setiap client 
+
+Setelah itu lakukan instalasi browser lynx pada setiap client
+
 ```
 #!/bin/bash
 
@@ -607,7 +655,7 @@ Setelah itu lakukan instalasi browser lynx pada setiap client
 if ! command -v named &> /dev/null
 then
     echo "Lynx belum ada, melakukan penginstalan..."
-    
+
     # Melakukan instalasi lynx
     apt-get update
     apt-get install lynx -y
@@ -616,7 +664,8 @@ else
 fi
 ```
 
-Lakukan setup konfigurasi pada Kotalingga (Web Server) 
+Lakukan setup konfigurasi pada Kotalingga (Web Server)
+
 ```
 #!/bin/bash
 
@@ -675,9 +724,11 @@ Lakukan testing pada masing-masing client dengan command `lynx http://10.83.3.6/
 ![image](https://github.com/user-attachments/assets/5b4fda40-5ee7-420a-b79d-b050768bd193)
 
 # Soal 13
+
 > Karena Sriwijaya dan Majapahit memenangkan pertempuran ini dan memiliki banyak uang dari hasil penjarahan (sebanyak 35 juta, belum dipotong pajak) maka pusat meminta kita memasang load balancer untuk membagikan uangnya pada web nya, dengan Kotalingga, Bedahulu, Tanjungkulai sebagai worker dan Solok sebagai Load Balancer menggunakan apache sebagai web server nya dan load balancer nya.
 
-Lakukan setup konfigurasi pada Sriwijaya (DNS Master) dan Majapahit (DNS Slave) 
+Lakukan setup konfigurasi pada Sriwijaya (DNS Master) dan Majapahit (DNS Slave)
+
 ```
 #!/bin/bash
 
@@ -687,7 +738,8 @@ nameserver 192.168.122.1
 nameserver 10.83.1.3' > /etc/resolv.conf
 ```
 
-Lakukan setup konfigurasi pada Load Balancer (Solok) 
+Lakukan setup konfigurasi pada Load Balancer (Solok)
+
 ```
 #!/bin/bash
 
@@ -736,6 +788,7 @@ service apache2 restart
 ```
 
 Lakukan setup konfigurasi pada masing-masing Web Server / Worker yang ada (Kotalingga, Bedahulu, Tanjungkulai)
+
 ```
 #!/bin/bash
 
@@ -789,5 +842,8 @@ cp worker/index.php /var/www/html/index.php
 service apache2 restart
 ```
 
-Testing menggunakan salah satu client dengan command `lynx http://10.83.1.3/index.php` 
+Testing menggunakan salah satu client dengan command `lynx http://10.83.1.3/index.php`
 
+![Video GIF No 13](./assets/1.gif)
+
+![Video GIF No 13](./assets/2.gif)
