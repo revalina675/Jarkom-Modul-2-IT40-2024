@@ -1052,28 +1052,94 @@ Testing di client dengan `http://10.83.1.3/`
 # Soal 19
 > Karena probset sudah kehabisan ide masuk ke salah satu worker buatkan akses direktori listing yang mengarah ke resource worker2.
 
-* Pertama, ketikkan `mkdir -p /var/www/sekianterimakasih.it40.com`
-  
-* Lakukan `cd /var/www/sekianterimakasih.it40.com`
-  
-* Ketikkan `curl -k "https://drive.usercontent.google.com/download?id={1JGk8b-tZgzAOnDqTx5B3F9qN6AyNs7Zy}&confirm=xxx" -o worker2.zip
-unzip worker2.zip`
+* Konsep soalnya adalah dengan membuat domain baru dimana kami menggunakan `sekianterimakasih.it40.com` sebagai domainnya dan melakukan setting directory listing
 
-* Setelah itu ketikkan `mv /var/www/dir-listing/worker2 /var/www/sekianterimakasih.it40.com`
-
-* Lakukan `nano /etc/apache2/sites-available/sekianterimakasih.it40.com` dan tambahkan
 ```
-ServerAdmin webmaster@localhost
-DocumentRoot /var/www/sekianterimakasih.it40.com`
-ServerName sekianterimakasih.it40.com`
+#!/bin/bash
 
-<Directory /var/www/sekianterimakasih.it40.com/worker2>
-  Options +Indexes
-</Directory>
-a2ensite sekianterimakasih.it40.com
-testing di client dengan lynx 10.83.3.6/worker2
+# Function to check if last command was successful
+check_error() {
+    if [ $? -ne 0 ]; then
+        echo "ERROR: $1"
+        exit 1
+    fi
+}
+
+# Cek port 80 dipakai atau tidak
+if netstat -tuln | grep -q ":80 "; then
+    echo "Port 80 is already in use. Stopping potentially conflicting services..."
+    service nginx stop 2>/dev/null
+    service apache2 stop 2>/dev/null
+    sleep 2
+fi
+
+mkdir -p /var/www/sekianterimakasih.it40.com
+check_error "Failed to create directory"
+
+cd /var/www/sekianterimakasih.it40.com
+check_error "Failed to change directory"
+
+curl -k "https://drive.usercontent.google.com/download?id={1JGk8b-tZgzAOnDqTx5B3F9qN6AyNs7Zy}&confirm=xxx" -o worker2.zip
+check_error "Failed to download worker2.zip"
+
+unzip -o worker2.zip
+check_error "Failed to unzip worker2.zip"
+
+rm -rf /var/www/sekianterimakasih.it40.com/worker2
+
+# Pindahkan direktori worker2 
+if [ -d "dir-listing/worker2" ]; then
+    cp -r dir-listing/worker2 /var/www/sekianterimakasih.it40.com/
+    check_error "Failed to copy worker2 directory"
+    rm -rf dir-listing
+else
+    echo "ERROR: Could not find worker2 directory"
+    exit 1
+fi
+
+chown -R www-data:www-data /var/www/sekianterimakasih.it40.com
+chmod -R 755 /var/www/sekianterimakasih.it40.com
+
+# Ubah file config Apache virtual host
+cat << 'EOF' > /etc/apache2/sites-available/sekianterimakasih.it40.com.conf
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/sekianterimakasih.it40.com
+    ServerName sekianterimakasih.it40.com
+    ServerAlias www.sekianterimakasih.it40.com
+
+    <Directory /var/www/sekianterimakasih.it40.com/worker2>
+        Options +Indexes
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/sekianterimakasih.it40.com_error.log
+    CustomLog ${APACHE_LOG_DIR}/sekianterimakasih.it40.com_access.log combined
+</VirtualHost>
+EOF
+check_error "Failed to create Apache configuration file"
+
+# cek log apache2 dan ubah permission
+mkdir -p /var/log/apache2
+chown -R www-data:www-data /var/log/apache2
+chmod -R 755 /var/log/apache2
+
+a2dissite 000-default.conf
+a2ensite sekianterimakasih.it40.com.conf
+
+# bantu redirect
+a2enmod rewrite
+
+apache2ctl configtest
+
+# Restart Apache more forcefully
+service apache2 stop
+sleep 2
+service apache2 start
+
+echo "Script execution completed. Checking Apache status..."
+service apache2 status
+
 ```
-
-* Setelah itu ketikkan `a2ensite sekianterimakasih.it40.com`
 
 * Dan terakhir, testing di client dengan `lynx 10.83.3.6/worker2`
