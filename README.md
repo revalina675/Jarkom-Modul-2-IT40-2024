@@ -349,7 +349,7 @@ Pada DNS Server (Sriwijaya) lakukan setup konfigurasi
 ```
 #!/bin/bash
 
-# Tambahkan kebutuhan untuk menjadi master pochinki
+# Tambahkan kebutuhan untuk menjadi master Sriwijaya
 echo '
 zone "sudarsana.it40.com" {
         type master;
@@ -732,7 +732,7 @@ Lakukan setup konfigurasi pada Sriwijaya (DNS Master) dan Majapahit (DNS Slave)
 ```
 #!/bin/bash
 
-# Tambahkan nameserver Ip Mylta
+# Tambahkan nameserver Ip Solok (LoadBalancer)
 echo '
 nameserver 192.168.122.1
 nameserver 10.83.1.3' > /etc/resolv.conf
