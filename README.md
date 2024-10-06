@@ -1143,3 +1143,41 @@ service apache2 status
 ```
 
 * Dan terakhir, testing di client dengan `lynx 10.83.3.6/worker2`
+
+# SOAl 20
+> Worker tersebut harus dapat di akses dengan sekiantterimakasih.xxxx.com dengan alias www.sekiantterimakasih.xxxx.com.
+
+Buat suatu setup konfigurasi pada DNS MAster (Sriwijaya) 
+```
+#!/bin/bash
+
+# Buat domain sekianterimakasih.it40.com
+echo 'zone "sekianterimakasih.it40.com" {
+	type master;
+	file "/etc/bind/jarkom/sekianterimakasih.it40.com";
+};' > /etc/bind/named.conf.local
+
+mkdir /etc/bind/jarkom
+
+cp /etc/bind/db.local /etc/bind/jarkom/sekianterimakasih.it40.com
+
+echo '
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     sekianterimakasih.it40.com. sekianterimakasih.it40.com. (
+                        2024050301      ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      sekianterimakasih.it40.com.
+@       IN      A       10.83.3.6     ; IP Kotalingga
+www     IN      CNAME   sekianterimakasih.it40.com.' > /etc/bind/jarkom/sekianterimakasih.it40.com
+
+service bind9 restart
+```
+
+Setelah itu testing di client dengan command `lynx sekianterimakasih.it40.com` dan `www.sekianterimakasih.it40.com`
